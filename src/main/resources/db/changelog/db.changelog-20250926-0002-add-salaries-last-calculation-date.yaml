@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20250926-0002-add-salaries-last-calculation-date
+      author: ahmed
+      changes:
+        - addColumn:
+            tableName: salaries
+            columns:
+              - column:
+                  name: calculation_date
+                  type: DATE

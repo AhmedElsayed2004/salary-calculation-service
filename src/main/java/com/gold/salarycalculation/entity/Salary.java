@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -27,6 +28,9 @@ public class Salary {
     @Column(name = "month_key", length = 7, nullable = false)
     private String monthKey;
 
+    @Column(name = "calculation_date", nullable = false)
+    private LocalDate calculationDate;
+
     @Column(name = "basic_salary", nullable = false, precision = 15, scale = 2)
     private BigDecimal basicSalary;
 
@@ -36,15 +40,19 @@ public class Salary {
     @Column(name = "deductions", nullable = false, precision = 15, scale = 2)
     private BigDecimal deductions;
 
-    @Column(name = "net_salary", nullable = false,precision = 15, scale = 2)
+    @Column(name = "net_salary", nullable = false, precision = 15, scale = 2)
     private BigDecimal netSalary;
 
-    @Column(name = "created_at", nullable = false,columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
+
+    public BigDecimal calculateNetSalary() {
+        return basicSalary.add(allowances).subtract(deductions);
+    }
 
 }

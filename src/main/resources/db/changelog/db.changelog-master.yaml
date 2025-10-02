@@ -2,3 +2,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/db.changelog-20250923-0001-initial-tables.yaml
       relativeToChangelogFile: false
+  - include:
+      file: db/changelog/db.changelog-20250926-0002-add-salaries-last-calculation-date.yaml
+      relativeToChangelogFile: false
