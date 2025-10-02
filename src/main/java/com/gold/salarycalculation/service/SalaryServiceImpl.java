@@ -6,7 +6,7 @@ import com.gold.salarycalculation.entity.Salary;
 import com.gold.salarycalculation.enums.EmployeeStatus;
 import com.gold.salarycalculation.repository.EmployeeRepository;
 import com.gold.salarycalculation.repository.SalaryRepository;
-import com.gold.salarycalculation.service.factory.SalaryFactory;
+import com.gold.salarycalculation.service.factory.SalaryCreator;
 import com.gold.salarycalculation.service.util.CalculationDateResolver;
 import org.springframework.stereotype.Service;
 
@@ -16,22 +16,23 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class SalaryServiceImpl implements SalaryService {
     private final SalaryRepository salaryRepository;
     private final EmployeeRepository employeeRepository;
-    private final SalaryFactory salaryFactory;
+    private final SalaryCreator salaryCreator;
     private final CalculationDateResolver calculationDateResolver;
 
-    public SalaryServiceImpl(SalaryRepository salaryRepository
-            , EmployeeRepository employeeRepository
-            , SalaryFactory salaryFactory
-            , CalculationDateResolver calculationDateResolver) {
+    public SalaryServiceImpl(SalaryRepository salaryRepository,
+                             EmployeeRepository employeeRepository,
+                             SalaryCreator salaryCreator,
+                             CalculationDateResolver calculationDateResolver) {
         this.salaryRepository = salaryRepository;
         this.employeeRepository = employeeRepository;
-        this.salaryFactory = salaryFactory;
+        this.salaryCreator = salaryCreator;
         this.calculationDateResolver = calculationDateResolver;
     }
 
@@ -47,31 +48,23 @@ public class SalaryServiceImpl implements SalaryService {
 
         LocalDate calculationDate = calculationDateResolver.resolve(monthKey);
 
-        List<Employee> activeEmployees = employeeRepository.findAllByStatusAndJoinDateLessThanEqual(EmployeeStatus.ACTIVE, calculationDate);
+        List<Employee> activeEmployees = employeeRepository.findEligibleForPayroll(monthKey, calculationDate);
 
         List<Salary> salaries = buildSalaries(activeEmployees, monthKey, calculationDate);
 
         BigDecimal totalPayroll = salaries.stream()
-                .map(this::saveSalary)
                 .map(Salary::getNetSalary)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        salaryRepository.saveAll(salaries);
 
         return new SalaryCalculationResponse(monthKey, activeEmployees.size(), totalPayroll);
     }
 
 
-    private Salary saveSalary(Salary salary) {
-        Optional<Salary> oldSalary = salaryRepository.findByEmployee_IdAndMonthKey(salary.getEmployee().getId(), salary.getMonthKey());
-        oldSalary.ifPresent(value -> salary.setId(value.getId()));
-        return salaryRepository.save(salary);
-    }
-
-
     private List<Salary> buildSalaries(List<Employee> employees, String monthKey, LocalDate calculationDate) {
         return employees.stream()
-                .filter(e -> !salaryRepository.existsByEmployee_IdAndCalculationDate(e.getId(), calculationDate))
-                .map(e -> salaryFactory.create(e, monthKey, calculationDate))
+                .map(e -> salaryCreator.create(e, monthKey, calculationDate))
                 .toList();
     }
 

@@ -23,8 +23,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class LeaveRequestServiceTest {
-    @Mock
-    private LeaveRequestRepository leaveRequestRepository;
     @InjectMocks
     private LeaveRequestServiceImpl leaveRequestService;
 
@@ -34,13 +32,10 @@ public class LeaveRequestServiceTest {
         Employee employee = new Employee();
         employee.setId(1L);
         employee.setJoinDate(LocalDate.of(2020, 1, 1));
+        employee.setLeaveRequests(new ArrayList<>());
         String monthKey = "2022-01";
         LocalDate calculationDate = LocalDate.of(2022, 1, 15);
 
-        when(leaveRequestRepository.findAllByEmployee_IdAndStatusAndLeaveType(
-                1L,
-                LeaveRequestStatus.APPROVED,
-                LeaveType.UNPAID)).thenReturn(new ArrayList<>());
 
         //Act
         int result = leaveRequestService.countApprovedUnpaidLeaveDays(employee, monthKey, calculationDate);
@@ -53,23 +48,20 @@ public class LeaveRequestServiceTest {
     @Test
     public void countApprovedUnpaidLeaveDays_ShouldReturnZero_WhenThereIsNoLeaveDays() {
         //Arrange data
+        LeaveRequest leaveRequest = new LeaveRequest();
+        leaveRequest.setStartDate(LocalDate.of(2020, 1, 1));
+        leaveRequest.setEndDate(LocalDate.of(2020, 1, 10));
+
         Employee employee = new Employee();
         employee.setId(1L);
         employee.setJoinDate(LocalDate.of(2020, 1, 1));
+        employee.setLeaveRequests(List.of(leaveRequest));
 
         String monthKey = "2022-01";
 
         LocalDate calculationDate = LocalDate.of(2022, 1, 15);
 
-        LeaveRequest leaveRequest = new LeaveRequest();
-        leaveRequest.setStartDate(LocalDate.of(2020, 1, 1));
-        leaveRequest.setEndDate(LocalDate.of(2020, 1, 10));
 
-
-        when(leaveRequestRepository.findAllByEmployee_IdAndStatusAndLeaveType(
-                1L,
-                LeaveRequestStatus.APPROVED,
-                LeaveType.UNPAID)).thenReturn(List.of(leaveRequest));
 
         //Act
         int result = leaveRequestService.countApprovedUnpaidLeaveDays(employee, monthKey, calculationDate);
@@ -81,23 +73,19 @@ public class LeaveRequestServiceTest {
     @Test
     public void countApprovedUnpaidLeaveDays_ShouldReturnNumber_WhenThereIsLeaveDays() {
         //Arrange data
+        LeaveRequest leaveRequest = new LeaveRequest();
+        leaveRequest.setStartDate(LocalDate.of(2020, 12, 1));
+        leaveRequest.setEndDate(LocalDate.of(2022, 1, 10));
+
         Employee employee = new Employee();
         employee.setId(1L);
         employee.setJoinDate(LocalDate.of(2020, 1, 1));
+        employee.setLeaveRequests(List.of(leaveRequest));
 
         String monthKey = "2022-01";
 
         LocalDate calculationDate = LocalDate.of(2022, 1, 15);
 
-        LeaveRequest leaveRequest = new LeaveRequest();
-        leaveRequest.setStartDate(LocalDate.of(2020, 12, 1));
-        leaveRequest.setEndDate(LocalDate.of(2022, 1, 10));
-
-
-        when(leaveRequestRepository.findAllByEmployee_IdAndStatusAndLeaveType(
-                1L,
-                LeaveRequestStatus.APPROVED,
-                LeaveType.UNPAID)).thenReturn(List.of(leaveRequest));
 
         //Act
         int result = leaveRequestService.countApprovedUnpaidLeaveDays(employee, monthKey, calculationDate);

@@ -5,21 +5,17 @@ import com.gold.salarycalculation.entity.LeaveRequest;
 import com.gold.salarycalculation.enums.LeaveRequestStatus;
 import com.gold.salarycalculation.enums.LeaveType;
 import com.gold.salarycalculation.repository.LeaveRequestRepository;
+import org.apache.commons.lang3.Range;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class LeaveRequestServiceImpl implements LeaveRequestService {
-
-    private final LeaveRequestRepository leaveRequestRepository;
-
-    public LeaveRequestServiceImpl(LeaveRequestRepository leaveRequestRepository) {
-        this.leaveRequestRepository = leaveRequestRepository;
-    }
 
     public int countApprovedUnpaidLeaveDays(Employee employee, String monthKey, LocalDate calculationDate) {
         YearMonth yearMonth = YearMonth.parse(monthKey);
@@ -30,12 +26,9 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
             firstDayEmployeeWork = employeeJoinDate;
         else
             firstDayEmployeeWork = firstDay;
-        List<LeaveRequest> leaveRequests = leaveRequestRepository.findAllByEmployee_IdAndStatusAndLeaveType(
-                employee.getId(),
-                LeaveRequestStatus.APPROVED,
-                LeaveType.UNPAID);
+        List<LeaveRequest> leaveRequests = employee.getLeaveRequests();
         return leaveRequests.stream()
-                .map(e -> overlapDays(
+                .map(e -> countLeaveDays(
                         e.getStartDate(),
                         e.getEndDate(),
                         firstDayEmployeeWork,
@@ -44,17 +37,19 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
                 .reduce(0, Integer::sum);
     }
 
-    private int overlapDays(LocalDate range1Start,
-                            LocalDate range1End,
-                            LocalDate range2Start,
-                            LocalDate range2End) {
-        LocalDate start = range1Start.isAfter(range2Start) ? range1Start : range2Start;
-        LocalDate end = range1End.isBefore(range2End) ? range1End : range2End;
+    private int countLeaveDays(LocalDate leaveStart,
+                               LocalDate leaveEnd,
+                               LocalDate workStart,
+                               LocalDate workEnd) {
+        Range<LocalDate> leaveDays = Range.of(leaveStart, leaveEnd);
+        Range<LocalDate> workDays = Range.of(workStart, workEnd);
 
-        if (start.isAfter(end)) {
+        if (!workDays.isOverlappedBy(leaveDays)) {
             return 0;
         }
 
-        return (int) ChronoUnit.DAYS.between(start, end) + 1;
+        Range<LocalDate> leaveWithinWorkPeriod = workDays.intersectionWith(leaveDays);
+
+        return (int) ChronoUnit.DAYS.between(leaveWithinWorkPeriod.getMinimum(), leaveWithinWorkPeriod.getMaximum()) + 1;
     }
 }

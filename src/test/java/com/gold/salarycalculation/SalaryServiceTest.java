@@ -9,7 +9,7 @@ import com.gold.salarycalculation.repository.EmployeeRepository;
 import com.gold.salarycalculation.repository.SalaryRepository;
 import com.gold.salarycalculation.service.SalaryCalculator;
 import com.gold.salarycalculation.service.SalaryServiceImpl;
-import com.gold.salarycalculation.service.factory.SalaryFactory;
+import com.gold.salarycalculation.service.factory.SalaryCreator;
 import com.gold.salarycalculation.service.util.CalculationDateResolver;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -42,7 +43,7 @@ public class SalaryServiceTest {
     @Mock
     private SalaryCalculator salaryCalculator;
     @Mock
-    private SalaryFactory salaryFactory;
+    private SalaryCreator salaryCreator;
     @Mock
     private CalculationDateResolver calculationDateResolver;
 
@@ -54,10 +55,11 @@ public class SalaryServiceTest {
     public void processSalaryCalculation_ShouldReturnZeroPayroll_WhenNoActiveEmployees() {
         // Arrange
         String monthKey = "2022-01";
+        LocalDate calculationDate = LocalDate.of(2022, 1, 31);
 
-        when(calculationDateResolver.resolve(monthKey)).thenReturn(LocalDate.of(2022, 1, 31));
-        when(employeeRepository.findAllByStatusAndJoinDateLessThanEqual(eq(EmployeeStatus.ACTIVE)
-                , any(LocalDate.class))).thenReturn(new ArrayList<>());
+        when(calculationDateResolver.resolve(monthKey)).thenReturn(calculationDate);
+        when(employeeRepository.findEligibleForPayroll(monthKey
+                , calculationDate)).thenReturn(new ArrayList<>());
 
         //Act
         SalaryCalculationResponse result = salaryService.processSalaryCalculation(monthKey);
@@ -81,28 +83,20 @@ public class SalaryServiceTest {
 
         Salary salary1 = new Salary();
         salary1.setNetSalary(BigDecimal.valueOf(10900));
-        salary1.setEmployee(employee1);
-        salary1.setMonthKey(monthKey);
         Salary salary2 = new Salary();
         salary2.setNetSalary(BigDecimal.valueOf(20950));
-        salary2.setEmployee(employee2);
-        salary2.setMonthKey(monthKey);
 
 
 
         when(calculationDateResolver.resolve(monthKey)).thenReturn(calculationDate);
 
-        when(employeeRepository.findAllByStatusAndJoinDateLessThanEqual(eq(EmployeeStatus.ACTIVE)
-                , any(LocalDate.class))).thenReturn(Arrays.asList(employee1, employee2));
-        when(salaryRepository.existsByEmployee_IdAndCalculationDate(any(Long.class)
-                , any(LocalDate.class))).thenReturn(false);
+        when(employeeRepository.findEligibleForPayroll(monthKey, calculationDate)).thenReturn(Arrays.asList(employee1, employee2));
 
-        when(salaryFactory.create(employee1, monthKey, calculationDate)).thenReturn(salary1);
-        when(salaryFactory.create(employee2, monthKey, calculationDate)).thenReturn(salary2);
 
-        when(salaryRepository.findByEmployee_IdAndMonthKey(any(Long.class), any(String.class)))
-                .thenReturn(Optional.empty());
-        when(salaryRepository.save(any(Salary.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(salaryCreator.create(employee1, monthKey, calculationDate)).thenReturn(salary1);
+        when(salaryCreator.create(employee2, monthKey, calculationDate)).thenReturn(salary2);
+
+        when(salaryRepository.saveAll(any())).thenReturn(new ArrayList<>());
 
 
         BigDecimal expectedPayroll = BigDecimal.valueOf(31850);
