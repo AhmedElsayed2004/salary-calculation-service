@@ -13,8 +13,8 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SalaryCalculationResponse {
-    String month;
-    int employeesProcessed;
-    BigDecimal totalPayroll;
+    private String month;
+    private int employeesProcessed;
+    private BigDecimal totalPayroll;
 
 }

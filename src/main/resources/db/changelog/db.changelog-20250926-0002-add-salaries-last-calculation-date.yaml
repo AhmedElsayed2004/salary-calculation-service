@@ -9,5 +9,3 @@ databaseChangeLog:
               - column:
                   name: calculation_date
                   type: DATE
-                  constraints:
-                    nullable: false
