@@ -28,6 +28,10 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
             firstDayEmployeeWork = firstDay;
         List<LeaveRequest> leaveRequests = employee.getLeaveRequests();
         return leaveRequests.stream()
+                .filter(e ->
+                        e.getLeaveType().equals(LeaveType.UNPAID) &&
+                                e.getStatus().equals(LeaveRequestStatus.APPROVED)
+                )
                 .map(e -> countLeaveDays(
                         e.getStartDate(),
                         e.getEndDate(),

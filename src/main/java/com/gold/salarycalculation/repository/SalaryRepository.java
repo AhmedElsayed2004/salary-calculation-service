@@ -17,4 +17,6 @@ public interface SalaryRepository extends JpaRepository<Salary, Long> {
     Optional<Salary> findByEmployee_IdAndMonthKey(Long employeeId, String monthKey);
 
     boolean existsByEmployee_IdAndCalculationDate(Long employeeId, LocalDate calculationDate);
+
+    List<Salary> findAllByMonthKeyAndEmployee_IdIn(String monthKey, List<Long> employeeIds);
 }

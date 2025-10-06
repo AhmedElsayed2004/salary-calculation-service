@@ -2,6 +2,7 @@ package com.gold.salarycalculation.repository;
 
 import com.gold.salarycalculation.entity.Employee;
 import com.gold.salarycalculation.enums.EmployeeStatus;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,14 +20,28 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Query("""
             SELECT DISTINCT e
             FROM Employee e
-            LEFT JOIN FETCH e.leaveRequests lr ON lr.leaveType = 'UNPAID' AND lr.status = 'ACCEPTED'
-            LEFT JOIN FETCH e.salaries s ON s.monthKey = :monthKey
+            LEFT JOIN FETCH e.leaveRequests lr
             WHERE e.status = 'ACTIVE'
-            AND e.joinDate <= :joinDate
-            AND s.calculationDate != :calculationDate
+            AND e.joinDate <= :calculationDate
             """)
-    List<Employee> findEligibleForPayroll(
+    List<Employee> findActiveEmployeesEligibleForPayroll(
             @Param("monthKey") String monthKey,
-            @Param("joinDate") LocalDate joinDate
-            );
+            @Param("calculationDate") LocalDate calculationDate
+    );
+
+
+    @Query("""
+            SELECT DISTINCT e
+            FROM Employee e
+            LEFT JOIN FETCH e.salaries s
+            WHERE e.status = 'ACTIVE'
+            AND e.joinDate <= :calculationDate
+            AND s.monthKey = :monthKey
+            """)
+    List<Employee> findActiveEmployeesWithSalaryForMonth(
+            @Param("monthKey") String monthKey,
+            @Param("calculationDate") LocalDate calculationDate
+    );
+
+
 }
