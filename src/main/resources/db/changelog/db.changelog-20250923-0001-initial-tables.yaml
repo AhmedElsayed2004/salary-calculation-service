@@ -114,7 +114,7 @@ databaseChangeLog:
               - column:
                   name: created_at
                   type: TIMESTAMP
-                  defaultValue: CURRENT_TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
 
         - addForeignKeyConstraint:
             baseTableName: leave_requests

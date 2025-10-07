@@ -1,5 +1,6 @@
 package com.gold.salarycalculation.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.Constraint;
 import lombok.AllArgsConstructor;
@@ -47,6 +48,7 @@ public class Salary {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
