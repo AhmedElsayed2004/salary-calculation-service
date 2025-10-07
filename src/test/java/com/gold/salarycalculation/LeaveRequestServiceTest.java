@@ -51,6 +51,8 @@ public class LeaveRequestServiceTest {
         LeaveRequest leaveRequest = new LeaveRequest();
         leaveRequest.setStartDate(LocalDate.of(2020, 1, 1));
         leaveRequest.setEndDate(LocalDate.of(2020, 1, 10));
+        leaveRequest.setLeaveType(LeaveType.UNPAID);
+        leaveRequest.setStatus(LeaveRequestStatus.APPROVED);
 
         Employee employee = new Employee();
         employee.setId(1L);
@@ -60,7 +62,6 @@ public class LeaveRequestServiceTest {
         String monthKey = "2022-01";
 
         LocalDate calculationDate = LocalDate.of(2022, 1, 15);
-
 
 
         //Act
@@ -76,6 +77,8 @@ public class LeaveRequestServiceTest {
         LeaveRequest leaveRequest = new LeaveRequest();
         leaveRequest.setStartDate(LocalDate.of(2020, 12, 1));
         leaveRequest.setEndDate(LocalDate.of(2022, 1, 10));
+        leaveRequest.setLeaveType(LeaveType.UNPAID);
+        leaveRequest.setStatus(LeaveRequestStatus.APPROVED);
 
         Employee employee = new Employee();
         employee.setId(1L);

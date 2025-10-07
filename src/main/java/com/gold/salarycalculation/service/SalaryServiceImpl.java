@@ -14,9 +14,7 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,9 +46,28 @@ public class SalaryServiceImpl implements SalaryService {
 
         LocalDate calculationDate = calculationDateResolver.resolve(monthKey);
 
-        List<Employee> activeEmployees = employeeRepository.findEligibleForPayroll(monthKey, calculationDate);
+        // 1) employees + leaveRequests eager-loaded (your existing query)
+        List<Employee> eligibleEmployees = employeeRepository.findActiveEmployeesEligibleForPayroll(monthKey, calculationDate);
 
-        List<Salary> salaries = buildSalaries(activeEmployees, monthKey, calculationDate);
+        if (eligibleEmployees.isEmpty()) {
+            return new SalaryCalculationResponse(monthKey, 0, BigDecimal.ZERO);
+        }
+
+        // 2) fetch existing salaries for this month but only for these employees
+        List<Long> employeeIds = eligibleEmployees.stream().map(Employee::getId).toList();
+
+        List<Salary> existingSalaries = salaryRepository.findAllByMonthKeyAndEmployee_IdIn(monthKey, employeeIds);
+
+        Map<Long, List<Salary>> salariesByEmployeeId = existingSalaries.stream()
+                .collect(Collectors.groupingBy(s -> s.getEmployee().getId()));
+
+        // attach salaries to the already-loaded employees
+        eligibleEmployees.forEach(emp ->
+                emp.setSalaries(salariesByEmployeeId.getOrDefault(emp.getId(), new ArrayList<>()))
+        );
+
+        // 3) build and save
+        List<Salary> salaries = buildSalaries(eligibleEmployees, monthKey, calculationDate);
 
         BigDecimal totalPayroll = salaries.stream()
                 .map(Salary::getNetSalary)
@@ -58,7 +75,7 @@ public class SalaryServiceImpl implements SalaryService {
 
         salaryRepository.saveAll(salaries);
 
-        return new SalaryCalculationResponse(monthKey, activeEmployees.size(), totalPayroll);
+        return new SalaryCalculationResponse(monthKey, eligibleEmployees.size(), totalPayroll);
     }
 
 

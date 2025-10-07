@@ -58,7 +58,7 @@ public class SalaryServiceTest {
         LocalDate calculationDate = LocalDate.of(2022, 1, 31);
 
         when(calculationDateResolver.resolve(monthKey)).thenReturn(calculationDate);
-        when(employeeRepository.findEligibleForPayroll(monthKey
+        when(employeeRepository.findActiveEmployeesEligibleForPayroll(monthKey
                 , calculationDate)).thenReturn(new ArrayList<>());
 
         //Act
@@ -87,11 +87,10 @@ public class SalaryServiceTest {
         salary2.setNetSalary(BigDecimal.valueOf(20950));
 
 
-
         when(calculationDateResolver.resolve(monthKey)).thenReturn(calculationDate);
 
-        when(employeeRepository.findEligibleForPayroll(monthKey, calculationDate)).thenReturn(Arrays.asList(employee1, employee2));
-
+        when(employeeRepository.findActiveEmployeesEligibleForPayroll(monthKey, calculationDate)).thenReturn(Arrays.asList(employee1, employee2));
+        when(salaryRepository.findAllByMonthKeyAndEmployee_IdIn(any(String.class), any(List.class))).thenReturn(new ArrayList<>());
 
         when(salaryCreator.create(employee1, monthKey, calculationDate)).thenReturn(salary1);
         when(salaryCreator.create(employee2, monthKey, calculationDate)).thenReturn(salary2);
