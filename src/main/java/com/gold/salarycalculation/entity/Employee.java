@@ -1,5 +1,6 @@
 package com.gold.salarycalculation.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.gold.salarycalculation.enums.EmployeeStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -43,9 +44,11 @@ public class Employee {
     @Column(name = "status", nullable = false)
     private EmployeeStatus status;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
     private List<LeaveRequest> leaveRequests;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
     private List<Salary> salaries;
 

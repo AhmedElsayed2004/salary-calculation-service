@@ -34,8 +34,8 @@ public class SalaryController {
             @RequestParam
             @Pattern(regexp = "\\d{4}-\\d{2}", message = "Month must be in format YYYY-MM")
             String month) {
-        YearMonth ym = YearMonth.parse(month);
-        if (ym.isAfter(YearMonth.now(clock))) {
+        YearMonth monthToCalculate = YearMonth.parse(month);
+        if (monthToCalculate.isAfter(YearMonth.now(clock))) {
             throw new IllegalArgumentException("Month must not be in the future");
         }
         return new ResponseEntity<>(salaryService.getSalariesByMonthKey(month), HttpStatus.OK);
@@ -46,8 +46,8 @@ public class SalaryController {
             @RequestParam
             @Pattern(regexp = "\\d{4}-\\d{2}", message = "Month must be in format YYYY-MM")
             String month) {
-        YearMonth ym = YearMonth.parse(month);
-        if (ym.isAfter(YearMonth.now(clock))) {
+        YearMonth monthToCalculate = YearMonth.parse(month);
+        if (monthToCalculate.isAfter(YearMonth.now(clock))) {
             throw new IllegalArgumentException("Month must not be in the future");
         }
         return new ResponseEntity<>(salaryService.processSalaryCalculation(month), HttpStatus.CREATED);
