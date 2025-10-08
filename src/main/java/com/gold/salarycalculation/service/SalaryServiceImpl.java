@@ -46,27 +46,8 @@ public class SalaryServiceImpl implements SalaryService {
 
         LocalDate calculationDate = calculationDateResolver.resolve(monthKey);
 
-        // 1) employees + leaveRequests eager-loaded (your existing query)
         List<Employee> eligibleEmployees = employeeRepository.findActiveEmployeesEligibleForPayroll(monthKey, calculationDate);
 
-        if (eligibleEmployees.isEmpty()) {
-            return new SalaryCalculationResponse(monthKey, 0, BigDecimal.ZERO);
-        }
-
-        // 2) fetch existing salaries for this month but only for these employees
-        List<Long> employeeIds = eligibleEmployees.stream().map(Employee::getId).toList();
-
-        List<Salary> existingSalaries = salaryRepository.findAllByMonthKeyAndEmployee_IdIn(monthKey, employeeIds);
-
-        Map<Long, List<Salary>> salariesByEmployeeId = existingSalaries.stream()
-                .collect(Collectors.groupingBy(s -> s.getEmployee().getId()));
-
-        // attach salaries to the already-loaded employees
-        eligibleEmployees.forEach(emp ->
-                emp.setSalaries(salariesByEmployeeId.getOrDefault(emp.getId(), new ArrayList<>()))
-        );
-
-        // 3) build and save
         List<Salary> salaries = buildSalaries(eligibleEmployees, monthKey, calculationDate);
 
         BigDecimal totalPayroll = salaries.stream()

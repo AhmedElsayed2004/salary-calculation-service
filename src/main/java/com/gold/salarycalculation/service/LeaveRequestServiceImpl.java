@@ -13,6 +13,7 @@ import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class LeaveRequestServiceImpl implements LeaveRequestService {
@@ -26,7 +27,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
             firstDayEmployeeWork = employeeJoinDate;
         else
             firstDayEmployeeWork = firstDay;
-        List<LeaveRequest> leaveRequests = employee.getLeaveRequests();
+        Set<LeaveRequest> leaveRequests = employee.getLeaveRequests();
         return leaveRequests.stream()
                 .filter(e ->
                         e.getLeaveType().equals(LeaveType.UNPAID) &&
