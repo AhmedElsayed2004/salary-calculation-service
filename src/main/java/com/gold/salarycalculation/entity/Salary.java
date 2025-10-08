@@ -44,7 +44,7 @@ public class Salary {
     @Column(name = "net_salary", nullable = false, precision = 15, scale = 2)
     private BigDecimal netSalary;
 
-    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_at", nullable = false, insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     @CreationTimestamp
     private LocalDateTime createdAt;
 
