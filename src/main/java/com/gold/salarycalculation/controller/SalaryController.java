@@ -2,6 +2,8 @@ package com.gold.salarycalculation.controller;
 
 import com.gold.salarycalculation.dto.SalaryCalculationResponse;
 import com.gold.salarycalculation.entity.Salary;
+import com.gold.salarycalculation.exception.EmployeeNotFoundException;
+import com.gold.salarycalculation.service.EmployeeService;
 import com.gold.salarycalculation.service.SalaryService;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.http.HttpStatus;
@@ -16,16 +18,22 @@ import java.util.List;
 @RequestMapping("/salaries")
 public class SalaryController {
     private final SalaryService salaryService;
+    private final EmployeeService employeeService;
     private final Clock clock;
 
     public SalaryController(SalaryService salaryService,
+                            EmployeeService employeeService,
                             Clock clock) {
         this.salaryService = salaryService;
+        this.employeeService = employeeService;
         this.clock = clock;
     }
 
     @GetMapping("/{employeeId}")
     public ResponseEntity<List<Salary>> getEmployeeSalariesHistory(@PathVariable Long employeeId) {
+        if (!employeeService.existById(employeeId)) {
+            throw new EmployeeNotFoundException(employeeId);
+        }
         return new ResponseEntity<>(salaryService.getSalariesByEmployeeId(employeeId), HttpStatus.OK);
     }
 
