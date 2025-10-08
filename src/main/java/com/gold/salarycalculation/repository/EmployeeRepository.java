@@ -21,24 +21,11 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
             SELECT DISTINCT e
             FROM Employee e
             LEFT JOIN FETCH e.leaveRequests lr
+            LEFT JOIN FETCH e.salaries s
             WHERE e.status = 'ACTIVE'
             AND e.joinDate <= :calculationDate
             """)
     List<Employee> findActiveEmployeesEligibleForPayroll(
-            @Param("monthKey") String monthKey,
-            @Param("calculationDate") LocalDate calculationDate
-    );
-
-
-    @Query("""
-            SELECT DISTINCT e
-            FROM Employee e
-            LEFT JOIN FETCH e.salaries s
-            WHERE e.status = 'ACTIVE'
-            AND e.joinDate <= :calculationDate
-            AND s.monthKey = :monthKey
-            """)
-    List<Employee> findActiveEmployeesWithSalaryForMonth(
             @Param("monthKey") String monthKey,
             @Param("calculationDate") LocalDate calculationDate
     );

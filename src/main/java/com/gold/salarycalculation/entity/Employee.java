@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -46,10 +47,10 @@ public class Employee {
 
     @JsonIgnore
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
-    private List<LeaveRequest> leaveRequests;
+    private Set<LeaveRequest> leaveRequests;
 
     @JsonIgnore
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
-    private List<Salary> salaries;
+    private Set<Salary> salaries;
 
 }

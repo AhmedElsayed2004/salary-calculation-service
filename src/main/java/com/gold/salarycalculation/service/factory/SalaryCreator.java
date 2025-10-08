@@ -25,9 +25,12 @@ public class SalaryCreator {
         salary.setAllowances(salaryCalculator.calculateAllowances(employee, calculationDate));
         salary.setDeductions(salaryCalculator.calculateDeduction(employee, monthKey, calculationDate));
         salary.setNetSalary(salary.calculateNetSalary());
-        Long salaryId = employee.getSalaries().isEmpty()
-                ? null
-                : employee.getSalaries().get(0).getId();
+        Long salaryId = employee.getSalaries()
+                .stream()
+                .filter(e -> e.getMonthKey().equals(monthKey))
+                .map(Salary::getId)
+                .findFirst()
+                .orElse(null);
         salary.setId(salaryId);
         return salary;
     }

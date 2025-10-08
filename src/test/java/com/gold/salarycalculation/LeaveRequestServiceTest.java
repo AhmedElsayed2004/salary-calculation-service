@@ -14,9 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.when;
@@ -32,7 +30,7 @@ public class LeaveRequestServiceTest {
         Employee employee = new Employee();
         employee.setId(1L);
         employee.setJoinDate(LocalDate.of(2020, 1, 1));
-        employee.setLeaveRequests(new ArrayList<>());
+        employee.setLeaveRequests(new HashSet<>());
         String monthKey = "2022-01";
         LocalDate calculationDate = LocalDate.of(2022, 1, 15);
 
@@ -57,7 +55,7 @@ public class LeaveRequestServiceTest {
         Employee employee = new Employee();
         employee.setId(1L);
         employee.setJoinDate(LocalDate.of(2020, 1, 1));
-        employee.setLeaveRequests(List.of(leaveRequest));
+        employee.setLeaveRequests(Set.of(leaveRequest));
 
         String monthKey = "2022-01";
 
@@ -83,7 +81,7 @@ public class LeaveRequestServiceTest {
         Employee employee = new Employee();
         employee.setId(1L);
         employee.setJoinDate(LocalDate.of(2020, 1, 1));
-        employee.setLeaveRequests(List.of(leaveRequest));
+        employee.setLeaveRequests(Set.of(leaveRequest));
 
         String monthKey = "2022-01";
 
